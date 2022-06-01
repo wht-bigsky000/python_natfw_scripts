@@ -1,0 +1,36 @@
+rule name in-2.2.2.2-01
+parent-group packet-filter
+source-zone untrust
+destination-zone trust
+source-address 1.1.1.1 mask 255.255.255.255
+destination-address 2.2.2.2 mask 255.255.255.255
+service TCP_dst_70
+action permit
+q
+rule name in-3.3.3.3-01
+parent-group packet-filter
+source-zone untrust
+destination-zone trust
+source-address 1.1.1.1 mask 255.255.255.255
+destination-address 3.3.3.3 mask 255.255.255.255
+service TCP_dst_70
+action permit
+q
+rule name in-2.2.2.2-01
+parent-group packet-filter
+source-zone untrust
+destination-zone trust
+source-address 10.0.0.0 24
+destination-address 2.2.2.2 mask 255.255.255.255
+service TCP_dst_70
+action permit
+q
+rule name in-3.3.3.3-01
+parent-group packet-filter
+source-zone untrust
+destination-zone trust
+source-address 10.0.0.0 24
+destination-address 3.3.3.3 mask 255.255.255.255
+service TCP_dst_70
+action permit
+q
