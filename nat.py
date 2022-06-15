@@ -13,6 +13,10 @@ xlsx_file = 'ip.xlsx'
 # 策略组
 group = 'packet-filter'
 
+# 防火墙zone
+inner_zone = 'trust'
+outer_zone = 'untrust'
+
 # 信息类，用于存储策略信息
 class Policy_info:
 
@@ -59,6 +63,8 @@ def init_file(xlsx_file):
                             continue
                     # 初始化外部端口
                     elif colunm_id == 1:
+                        # 替换结尾的.0
+                        value = value.replace('.0',' ')
                         external_port_list.append(value.strip())
                     # 初始化云内ip
                     elif colunm_id == 2:
@@ -95,7 +101,7 @@ def nat_policy(direction,rule_num,Policy_info) -> str:
             if group:
                 parent_group = f'parent-group {group}\n'
             #策略方向
-            zone = 'source-zone untrust\ndestination-zone trust\n'
+            zone = f'source-zone {outer_zone}\ndestination-zone {inner_zone}\n'
             #源地址
             source_address = ''
             for source_ip in Policy_info.external_ip :
@@ -153,7 +159,7 @@ def nat_policy(direction,rule_num,Policy_info) -> str:
             if group:
                 parent_group = f'parent-group {group}\n'
             #策略方向
-            zone = 'source-zone trust\ndestination-zone untrust\n'
+            zone = f'source-zone {inner_zone}\ndestination-zone {outer_zone}\n'
             #源地址
             source_address = f'source-address {source_ip} mask 255.255.255.255\n'
             #目的地址
@@ -195,14 +201,14 @@ def nat_policy(direction,rule_num,Policy_info) -> str:
             service = ''
             if Policy_info.external_port :
                 for dest_port in Policy_info.external_port :
-                    # 数字格式的非常见端口，命名为TCP_des_port
+                    # 数字格式的非常见端口，命名为TCP_dst_port
                     if re.fullmatch(r'\d+',dest_port) :
                         service = f'{service}service TCP_dst_{dest_port}\n'
                     # 英文格式的常见端口
                     elif re.fullmatch(r'[A-Za-z]+',dest_port) :
                         service = f'{service}service {dest_port}\n'
                     else :
-                        raise ValueError('cloud port format error!')
+                        raise ValueError('external port format error!')
             #生成一条rule
             rule_script = f'{rule_name}{parent_group}{zone}{source_address}{dest_address}{dest_domain}{service}action permit\nq\n'
             #将rule添加到总体脚本
@@ -247,7 +253,7 @@ def nat_policy_undo(direction,rule_num,Policy_info) -> str:
             service = ''
             if Policy_info.cloud_port :
                 for dest_port in Policy_info.cloud_port :
-                    # 数字格式的非常见端口，命名为TCP_des_port
+                    # 数字格式的非常见端口，命名为TCP_dst_port
                     if re.fullmatch(r'\d+',dest_port) :
                         service = f'{service}undo service TCP_dst_{dest_port}\n'
                     # 英文格式的常见端口
@@ -299,7 +305,7 @@ def nat_policy_undo(direction,rule_num,Policy_info) -> str:
             service = ''
             if Policy_info.external_port :
                 for dest_port in Policy_info.external_port :
-                    # 数字格式的非常见端口，命名为TCP_des_port
+                    # 数字格式的非常见端口，命名为TCP_dst_port
                     if re.fullmatch(r'\d+',dest_port) :
                         service = f'{service}undo service TCP_dst_{dest_port}\n'
                     # 英文格式的常见端口
@@ -399,7 +405,7 @@ if __name__ == '__main__':
             a = input(short_banner )
         elif a == '6':
             service_set_script = service_set()
-            with open('nat_script.txt','w+') as f:
+            with open('service_set.txt','w+') as f:
                 f.write(service_set_script)
             print('Done')
             a = input(short_banner )
