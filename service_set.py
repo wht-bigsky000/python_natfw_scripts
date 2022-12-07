@@ -6,7 +6,8 @@ def service_set():
     port = input('请输入服务端口,多个端口用空格分隔: ')
     #去掉结尾空格
     port = port.rstrip()
-    #以空格分隔
+    #以空格或逗号分隔
+    port = re.sub(r',',' ',port)
     port = port.split(' ')
     script = ''
     for num in port:
