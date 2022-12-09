@@ -2,3 +2,5 @@
 *.xlsx
 #生成的脚本文件
 *.txt
+#忽略cache目录
+__pycache__
